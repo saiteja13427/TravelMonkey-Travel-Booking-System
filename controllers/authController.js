@@ -10,6 +10,20 @@ const generateToken = (id) =>
     expiresIn: process.env.JWT_EXPIRESIN,
   });
 
+const createSendToken = (user, statusCode, res) => {
+  const token = generateToken(user._id);
+  const cookieOptions = {
+    expiresIn: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRESIN),
+    //Cannot be accessed by the browser
+    httpOnly: true,
+  };
+  //To send only on encrypted connection
+  if (process.env.NODE_ENV === "production") cookieOptions.secure = true;
+  res.cookie("jwt", token, cookieOptions);
+  user.password = undefined;
+  res.status(statusCode).json({ status: "success", token, data: { user } });
+};
+
 //@desc     Signup a user
 //@route    POST /api/users/signup
 //@access   public
@@ -27,7 +41,8 @@ const signup = asyncHandler(async (req, res, next) => {
     expiresIn: process.env.JWT_EXPIRESIN,
   });
 
-  res.status(201).json({ status: "success", token, data: { user } });
+  createSendToken(user, 201, res);
+  // res.status(201).json({ status: "success", token, data: { user } });
 });
 
 //@desc     login a user
@@ -42,6 +57,7 @@ const login = asyncHandler(async (req, res, next) => {
   }
   const user = await User.findOne({ email }).select("+password");
   //Check if email exists
+  console.log(user);
   if (!user) {
     return next(new AppError("Please provide a valid email and password", 400));
   }
@@ -51,8 +67,9 @@ const login = asyncHandler(async (req, res, next) => {
     return next(new AppError("Please provide a valid email and password", 400));
   }
   //Send token if everything is okay
-  const token = generateToken(user._id);
-  res.status(201).json({ status: "success", token, data: { user } });
+  createSendToken(user, 200, res);
+  // const token = generateToken(user._id);
+  // res.status(201).json({ status: "success", token, data: { user } });
 });
 
 //@desc     Forgot Password
@@ -120,8 +137,9 @@ const resetPassword = asyncHandler(async (req, res, next) => {
 
   //3) Log the user in and send the JWT
   //Send token if everything is okay
-  const token = generateToken(user._id);
-  res.status(201).json({ status: "success", token });
+  // const token = generateToken(user._id);
+  // res.status(201).json({ status: "success", token });
+  createSendToken(user, 201, res);
 });
 
 //@desc     Update Password
@@ -151,8 +169,9 @@ const updatePassword = asyncHandler(async (req, res, next) => {
   await user.save();
   //4) Log the password in, send JWT
   //Send token if everything is okay
-  const token = generateToken(user._id);
-  res.status(201).json({ status: "success", token });
+  // const token = generateToken(user._id);
+  // res.status(201).json({ status: "success", token });
+  createSendToken(user, 201, res);
 });
 
 const protect = asyncHandler(async (req, res, next) => {

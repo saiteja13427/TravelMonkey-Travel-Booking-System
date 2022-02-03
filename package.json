@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "server": "nodemon server.js",
-    "debug": "ndb server.js"
+    "debug": "ndb server.js",
+    "test": "jest"
   },
   "author": "Sai Teja",
   "license": "MIT",
@@ -14,13 +15,19 @@
     "colors": "^1.4.2",
     "dotenv": "^10.0.0",
     "express": "^4.17.2",
+    "express-mongo-sanitize": "^2.2.0",
+    "express-rate-limit": "^6.2.0",
+    "helmet": "^5.0.2",
+    "hpp": "^0.2.3",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.1.5",
     "morgan": "^1.10.0",
     "ndb": "^1.1.5",
     "nodemailer": "^6.7.2",
+    "request-promise": "^4.2.6",
     "slugify": "^1.6.5",
-    "validator": "^13.7.0"
+    "validator": "^13.7.0",
+    "xss-clean": "^0.1.1"
   },
   "devDependencies": {
     "eslint": "^8.6.0",
@@ -31,10 +38,18 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-react": "^7.28.0",
+    "jest": "^27.4.7",
     "nodemon": "^2.0.15",
-    "prettier": "^2.5.1"
+    "prettier": "^2.5.1",
+    "supertest": "^6.2.2"
   },
   "engines": {
     "node": "16.2.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ]
   }
 }

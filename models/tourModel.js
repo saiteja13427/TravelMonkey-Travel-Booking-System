@@ -1,6 +1,7 @@
 /* eslint-disable prefer-arrow-callback */
 const mongoose = require("mongoose");
 const slugify = require("slugify");
+// const User = require("./userModel");
 
 const tourSchema = new mongoose.Schema(
   {
@@ -70,6 +71,40 @@ const tourSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    //For start location
+    startLocation: {
+      //GeoJSON
+      type: {
+        type: String,
+        default: "Point",
+        enum: ["Point"],
+      },
+      //Longitude first and then latitude in the array
+      coordinates: [Number],
+      address: String,
+      description: String,
+    },
+    //For all the other locations in the tour
+    locations: [
+      {
+        type: {
+          type: String,
+          default: "Point",
+          enum: ["Point"],
+        },
+        //Longitude first and then latitude in the array
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number,
+      },
+    ],
+    guides: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
@@ -80,6 +115,12 @@ tourSchema.virtual("durationWeeks").get(function () {
   return this.duration / 7;
 });
 
+tourSchema.virtual("reviews", {
+  ref: "Review",
+  foreignField: "tour",
+  localField: "_id",
+});
+
 //MIDDLEWARES
 //1) DOCUMENT MIDDLEWARE
 //PRE SAVE HOOK/MIDDLEWARE
@@ -87,6 +128,15 @@ tourSchema.pre("save", function (next) {
   this.slug = slugify(this.name, { lower: true });
   next();
 });
+
+//If we wanted to embed guides
+// tourSchema.pre("save", async function (next) {
+//   const guidesPromises = this.guides.map(
+//     async (guide) => await User.findById(guide)
+//   );
+//   this.guides = await Promise.all(guidesPromises);
+//   next();
+// });
 
 //POST SAVE HOOK/MIDDLEWARE
 // tourSchema.post("save", function (doc, next) {
@@ -102,6 +152,15 @@ tourSchema.pre(/^find/, function (next) {
   this.find({ secretTour: { $ne: true } });
 
   this.start = Date.now();
+  next();
+});
+
+//Query middleware to populate
+tourSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: "guides",
+    select: "-__v",
+  });
   next();
 });
 

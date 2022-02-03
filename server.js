@@ -2,17 +2,17 @@ const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const connectDB = require("./db/config");
 
+dotenv.config();
+connectDB();
+
+const app = require("./app");
+
 //Global handler for Uncaught Exceptions
 process.on("uncaughtException", (error) => {
   console.log("UNCAUGHT EXCEPTION!! 🔥 Shutting Down");
   console.log("ERROR: ", error.name, error.message);
   process.exit(1);
 });
-
-dotenv.config();
-connectDB();
-
-const app = require("./app");
 
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, () => {

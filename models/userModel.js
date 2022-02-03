@@ -41,9 +41,17 @@ const userSchema = new mongoose.Schema({
       message: "Password and confirm password doesn't match",
     },
   },
-  passwordChangedAt: Date,
+  passwordChangedAt: {
+    type: Date,
+    select: false,
+  },
   passwordResetToken: String,
   passwordResetExpires: Date,
+  active: {
+    type: Boolean,
+    select: false,
+    default: true,
+  },
 });
 
 userSchema.pre("save", async function (next) {
@@ -61,7 +69,11 @@ userSchema.pre("save", function (next) {
   if (!this.isModified("password") || this.isNew) return next();
   //Subtracting 1000ms because in some cases the token might be generated before this is set due to async nature
   this.passwordChangedAt = Date.now() - 1000;
-  console.log("Hello");
+  next();
+});
+
+userSchema.pre(/^find/, function (next) {
+  this.find({ active: { $ne: false } });
   next();
 });
 

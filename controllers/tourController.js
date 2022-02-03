@@ -26,7 +26,9 @@ const getAllTours = asyncHandler(async (req, res, next) => {
 //@access   public
 const getTour = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  const tour = await Tour.findById(id);
+  const tour = await Tour.findById(id).populate({
+    path: "reviews",
+  });
   if (!tour) {
     return next(new AppError(`Tour with ID ${id} not found`, 404));
   }
