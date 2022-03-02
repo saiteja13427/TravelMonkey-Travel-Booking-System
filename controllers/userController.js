@@ -1,6 +1,7 @@
 const User = require("../models/userModel");
 const AppError = require("../utils/appError");
 const asyncHandler = require("../utils/asyncHandler");
+const { deleteOne, updateOne, getOne, getAll } = require("./handleFactory");
 
 const filterObj = (object, ...fields) => {
   const newObject = {};
@@ -12,14 +13,21 @@ const filterObj = (object, ...fields) => {
   return newObject;
 };
 
-const getAllUsers = asyncHandler(async (req, res, next) => {
-  const users = await User.find({});
-  res.status(200).json({ status: "success", data: { users } });
-});
-const createUser = () => {};
-const getUser = () => {};
-const updateUser = () => {};
-const deleteUser = () => {};
+const getAllUsers = getAll(User);
+
+const createUser = (req, res) => {
+  res.status(500).json({
+    status: "error",
+    message: "This route is not defined. Use /signup instead",
+  });
+};
+
+const getUser = getOne(User);
+
+//Don't attempt to change password with this
+const updateUser = updateOne(User);
+
+const deleteUser = deleteOne(User);
 
 const updateMe = asyncHandler(async (req, res, next) => {
   //Create error is user posts password;
@@ -46,6 +54,11 @@ const deleteMe = asyncHandler(async (req, res, next) => {
   res.status(204).json({ status: "success" });
 });
 
+const getMe = (req, res, next) => {
+  req.params.id = req.user._id;
+  next();
+};
+
 module.exports = {
   getAllUsers,
   getUser,
@@ -54,4 +67,5 @@ module.exports = {
   deleteUser,
   updateMe,
   deleteMe,
+  getMe,
 };

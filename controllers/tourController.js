@@ -1,74 +1,47 @@
 const fs = require("fs");
 const Tour = require("../models/tourModel");
-const APIFeatures = require("../utils/apiFeatures");
 const asyncHandler = require("../utils/asyncHandler");
 const AppError = require("../utils/appError");
+const {
+  deleteOne,
+  updateOne,
+  createOne,
+  getOne,
+  getAll,
+} = require("./handleFactory");
 
 //@desc     Get all tours
 //@route    GET /api/tours
 //@access   public
-const getAllTours = asyncHandler(async (req, res, next) => {
-  //Creating all filters in the class APIFeatures
-  const features = new APIFeatures(Tour.find(), req.query)
-    .filter()
-    .sort()
-    .project()
-    .paginate();
-  const tours = await features.query;
-  //Sending response
-  res
-    .status(200)
-    .json({ status: "success", results: tours.length, data: { tours } });
-});
+const getAllTours = getAll(Tour);
 
 //@desc     Get tours by id
 //@route    GET /api/tours/:id
 //@access   public
-const getTour = asyncHandler(async (req, res, next) => {
-  const { id } = req.params;
-  const tour = await Tour.findById(id).populate({
-    path: "reviews",
-  });
-  if (!tour) {
-    return next(new AppError(`Tour with ID ${id} not found`, 404));
-  }
-  res.status(200).json({ status: "success", data: { tour } });
-});
+const getTour = getOne(Tour, { path: "reviews" });
 
 //@desc     Create a tour
 //@route    POST /api/tours
 //@access   public
-const createTour = asyncHandler(async (req, res, next) => {
-  const newTour = await Tour.create(req.body);
-  res.status(201).json({ status: "success", data: { tour: newTour } });
-});
+const createTour = createOne(Tour);
 
 //@desc     Update a tours
 //@route    PATCH /api/tours/:id
 //@access   public
-const updateTour = asyncHandler(async (req, res, next) => {
-  const { id } = req.params;
-  const tour = await Tour.findByIdAndUpdate(id, req.body, {
-    new: true,
-    runValidators: true,
-  });
-  if (!tour) {
-    return next(new AppError(`Tour with ID ${id} Not Found`, 404));
-  }
-  res.status(200).json({ status: "success", data: { tour: tour } });
-});
+const updateTour = updateOne(Tour);
 
 //@desc     Delete a tours
 //@route    DELETE /api/tours/:ID
 //@access   public
-const deleteTour = asyncHandler(async (req, res, next) => {
-  const { id } = req.params;
-  const tour = await Tour.findByIdAndDelete(id);
-  if (!tour) {
-    return next(new AppError(`Tour with ID ${id} Not Found`, 404));
-  }
-  res.status(204).json({ status: "success" });
-});
+const deleteTour = deleteOne(Tour);
+// const deleteTour = asyncHandler(async (req, res, next) => {
+//   const { id } = req.params;
+//   const tour = await Tour.findByIdAndDelete(id);
+//   if (!tour) {
+//     return next(new AppError(`Tour with ID ${id} Not Found`, 404));
+//   }
+//   res.status(204).json({ status: "success" });
+// });
 
 //@desc     Alias to Get all tours with some filter
 //@route    GET /api/tours/top-5-cheap

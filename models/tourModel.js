@@ -109,6 +109,12 @@ const tourSchema = new mongoose.Schema(
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
+//Single Index
+// tourSchema.index({ price: 1});
+tourSchema.index({ slug: 1 });
+//Compound Index
+tourSchema.index({ price: 1, ratingsAverage: -1 });
+
 //Virtual Property
 //Arrow function doesn't work as it doesn't get this!!
 tourSchema.virtual("durationWeeks").get(function () {
